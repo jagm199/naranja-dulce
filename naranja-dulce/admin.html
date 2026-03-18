@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración – Naranja Dulce Gelatería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange:      #E8620A;
+      --orange-lt:   #F9A05A;
+      --orange-pale: #FEF0E6;
+      --brown:       #5C2D0E;
+      --brown-mid:   #8B4513;
+      --brown-pale:  #F5EDE6;
+      --white:       #FFFFFF;
+      --text:        #1A1A1A;
+      --text-muted:  #6B5744;
+      --border:      rgba(92,45,14,0.15);
+      --green-pale:  #EAF3DE;
+      --green:       #3B6D11;
+      --red-pale:    #FCEBEB;
+      --red:         #A32D2D;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--brown-pale); min-height: 100vh; }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--brown); padding: 0 1.5rem;
+      display: flex; align-items: center; gap: 1rem; height: 64px;
+    }
+    .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .topbar-logo img { width: 38px; height: 38px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.9); padding: 2px; }
+    .topbar-logo-text { font-family: 'Fraunces', serif; font-size: 15px; color: var(--white); }
+    .topbar-spacer { flex: 1; }
+    .admin-chip {
+      font-size: 12px; padding: 5px 12px; border-radius: 99px;
+      background: var(--orange); color: var(--white); font-weight: 500;
+    }
+    .btn-logout {
+      font-size: 12px; padding: 6px 12px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.3); background: none;
+      font-family: 'DM Sans', sans-serif; color: rgba(255,255,255,0.85); cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+    /* MAIN */
+    .main { max-width: 960px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 2px solid var(--brown); margin-bottom: 1.75rem; }
+    .tab {
+      padding: 9px 22px; font-size: 14px; font-weight: 500;
+      border: none; background: none; color: var(--text-muted); cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .tab.active { color: var(--white); background: var(--brown); border-bottom: 3px solid var(--orange); }
+    .tab:not(.active):hover { background: var(--brown-pale); }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* SECTION HEADER */
+    .sec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px; }
+    .sec-header h2 { font-family: 'Fraunces', serif; font-size: 20px; color: var(--brown); }
+
+    /* METRICS */
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-bottom: 1.75rem; }
+    .metric {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.1rem 1.25rem;
+      border-left: 4px solid var(--orange);
+    }
+    .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .metric-value { font-family: 'Fraunces', serif; font-size: 28px; color: var(--brown); }
+
+    /* CARD */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .card-pad { padding: 1.25rem; }
+
+    /* SEARCH */
+    .search-bar {
+      padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: center;
+    }
+    .search-bar input {
+      flex: 1; height: 36px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px;
+      background: var(--white); color: var(--text);
+    }
+    .search-bar input:focus { outline: none; border-color: var(--orange); }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; font-size: 11px; font-weight: 500;
+      color: var(--brown); padding: 10px 14px;
+      background: var(--brown-pale); border-bottom: 1px solid var(--border);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--orange-pale); }
+
+    .mini-stamps { display: flex; gap: 3px; align-items: center; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+    .dot.on { background: var(--orange); }
+
+    .btn-sello {
+      font-size: 12px; padding: 5px 12px; border-radius: 8px;
+      border: 1px solid var(--orange); background: var(--orange-pale);
+      cursor: pointer; color: var(--orange); font-family: 'DM Sans', sans-serif;
+      font-weight: 500; transition: background 0.15s;
+    }
+    .btn-sello:hover { background: #f9d4b6; }
+    .btn-sello:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* FORM NUEVO CLIENTE */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
+    .field input {
+      width: 100%; height: 38px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px;
+      background: var(--white); color: var(--text);
+    }
+    .field input:focus { outline: none; border-color: var(--orange); }
+    .form-actions { display: flex; gap: 10px; margin-top: 1rem; }
+    .btn-primary {
+      padding: 9px 20px; border: none; border-radius: 8px;
+      background: var(--brown); color: var(--white);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--brown-mid); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 9px 20px; border: 1px solid var(--border); border-radius: 8px;
+      background: none; color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif; font-size: 13px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: var(--brown-pale); }
+    .form-msg { font-size: 12px; margin-top: 10px; min-height: 16px; }
+    .form-msg.ok  { color: var(--green); }
+    .form-msg.err { color: var(--red); }
+
+    /* TOP CLIENTES */
+    .top-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .top-item:last-child { border-bottom: none; }
+    .top-rank { font-family: 'Fraunces', serif; font-size: 18px; color: var(--orange); min-width: 28px; }
+    .top-info { flex: 1; margin-left: 10px; }
+    .top-name  { font-size: 13px; font-weight: 500; color: var(--text); }
+    .top-email { font-size: 11px; color: var(--text-muted); }
+    .badge { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+    .badge.earn { background: var(--orange-pale); color: var(--orange); }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 14px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--brown); color: var(--white); padding: 10px 22px;
+      border-radius: 99px; font-size: 13px; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none;
+      border-left: 4px solid var(--orange); white-space: nowrap; z-index: 200;
+    }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-logo" href="index.html">
+    <img src="logo.jpg" alt="ND">
+    <span class="topbar-logo-text">Naranja Dulce Gelatería</span>
+  </a>
+  <div class="topbar-spacer"></div>
+  <span class="admin-chip">⚙ Administrador</span>
+  <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+</header>
+
+<main class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('clientes', this)">Clientes</button>
+    <button class="tab" onclick="switchTab('nuevo', this)">Nuevo cliente</button>
+    <button class="tab" onclick="switchTab('resumen', this)">Resumen</button>
+  </div>
+
+  <!-- ── CLIENTES ── -->
+  <div class="view active" id="view-clientes">
+    <div class="sec-header">
+      <h2>Clientes registrados</h2>
+      <button class="btn-primary" onclick="exportCSV()">Exportar CSV</button>
+    </div>
+    <div class="card">
+      <div class="search-bar">
+        <input type="text" id="search" placeholder="Buscar por nombre o correo..." oninput="filterClients()">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Cliente</th><th>Correo</th><th>Sellos</th><th>Registro</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="clients-body">
+            <tr><td colspan="5"><div class="loading">Cargando clientes...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NUEVO CLIENTE ── -->
+  <div class="view" id="view-nuevo">
+    <div class="sec-header">
+      <h2>Registrar nuevo cliente</h2>
+    </div>
+    <div class="card card-pad" style="max-width:500px;">
+      <div class="form-grid">
+        <div class="field"><label>Nombre *</label><input type="text" id="nc-nombre" placeholder="Ana"></div>
+        <div class="field"><label>Apellido</label><input type="text" id="nc-apellido" placeholder="García"></div>
+        <div class="field full"><label>Correo electrónico *</label><input type="email" id="nc-email" placeholder="ana@correo.com"></div>
+        <div class="field"><label>Teléfono</label><input type="tel" id="nc-tel" placeholder="+52 55 0000 0000"></div>
+        <div class="field"><label>Contraseña inicial *</label><input type="text" id="nc-pass" placeholder="Mínimo 6 caracteres"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="btn-crear" onclick="createClient()">Crear cliente</button>
+        <button class="btn-secondary" onclick="switchTab('clientes', document.querySelector('.tab'))">Cancelar</button>
+      </div>
+      <div class="form-msg" id="nc-msg"></div>
+    </div>
+  </div>
+
+  <!-- ── RESUMEN ── -->
+  <div class="view" id="view-resumen">
+    <div class="sec-header"><h2>Resumen general</h2></div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Clientes registrados</div><div class="metric-value" id="m-total">—</div></div>
+      <div class="metric"><div class="metric-label">Sellos otorgados hoy</div><div class="metric-value" id="m-hoy">—</div></div>
+      <div class="metric"><div class="metric-label">Canjes este mes</div><div class="metric-value" id="m-canjes">—</div></div>
+    </div>
+    <div class="card card-pad" style="max-width:560px;">
+      <div style="font-size:11px;font-weight:500;color:var(--brown);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">Top clientes por sellos</div>
+      <div id="top-list"><div class="loading">Cargando...</div></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { getUser, getProfile, getAllClients, addStamp, getSummary, adminCreateClient, signOut } from './supabase.js';
+
+  let allClients = [];
+
+  // ── Init ──
+  async function init() {
+    const user = await getUser();
+    if (!user) { window.location.href = 'index.html'; return; }
+    const profile = await getProfile(user.id);
+    if (profile.role !== 'admin') { window.location.href = 'app.html'; return; }
+    await loadClients();
+  }
+
+  // ── Cargar clientes ──
+  async function loadClients() {
+    try {
+      allClients = await getAllClients();
+      renderClients(allClients);
+    } catch (e) {
+      document.getElementById('clients-body').innerHTML =
+        `<tr><td colspan="5" style="color:#A32D2D;padding:1rem;">Error al cargar: ${e.message}</td></tr>`;
+    }
+  }
+
+  function renderClients(list) {
+    const tbody = document.getElementById('clients-body');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="loading">Sin clientes aún.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(c => {
+      const card   = c.loyalty_cards?.[0];
+      const stamps = card?.stamps ?? 0;
+      const cardId = card?.id ?? null;
+      const date   = new Date(c.created_at).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' });
+      return `
+        <tr>
+          <td>
+            <span style="font-weight:500;">${c.name}</span><br>
+            <span style="font-size:11px;color:var(--text-muted);font-family:monospace">
+              #${String(cardId ?? 0).padStart(4,'0')}
+            </span>
+          </td>
+          <td style="color:var(--text-muted);font-size:12px;">${c.id.substring(0,8)}…<br><small>${c.phone || '—'}</small></td>
+          <td>
+            <div class="mini-stamps">
+              ${Array.from({length:10},(_,i)=>`<div class="dot${i<stamps?' on':''}"></div>`).join('')}
+              <span style="font-size:12px;margin-left:6px;color:var(--text-muted)">${stamps}/10</span>
+            </div>
+          </td>
+          <td style="font-size:12px;color:var(--text-muted);">${date}</td>
+          <td>
+            <button class="btn-sello" ${!cardId||stamps>=10?'disabled':''} onclick="stamp('${cardId}',${stamps})">
+              ${stamps>=10?'¡Puede canjear!':'+ Sello'}
+            </button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  window.filterClients = function () {
+    const q = document.getElementById('search').value.toLowerCase();
+    renderClients(allClients.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      (c.loyalty_cards?.[0]?.id && String(c.loyalty_cards[0].id).includes(q))
+    ));
+  };
+
+  // ── Añadir sello ──
+  window.stamp = async function (cardId, currentStamps) {
+    try {
+      await addStamp(Number(cardId), currentStamps);
+      showToast('Sello añadido ✓');
+      await loadClients();
+    } catch (e) { showToast('Error: ' + e.message); }
+  };
+
+  // ── Crear cliente ──
+  window.createClient = async function () {
+    const nombre   = document.getElementById('nc-nombre').value.trim();
+    const apellido = document.getElementById('nc-apellido').value.trim();
+    const email    = document.getElementById('nc-email').value.trim().toLowerCase();
+    const phone    = document.getElementById('nc-tel').value.trim();
+    const password = document.getElementById('nc-pass').value.trim();
+    const msg      = document.getElementById('nc-msg');
+    const btn      = document.getElementById('btn-crear');
+
+    if (!nombre || !email || !password) {
+      msg.className = 'form-msg err'; msg.textContent = 'Nombre, correo y contraseña son obligatorios.'; return;
+    }
+    btn.disabled = true; btn.textContent = 'Creando...';
+    try {
+      await adminCreateClient({ name: nombre + (apellido ? ' ' + apellido : ''), phone, email, password });
+      msg.className = 'form-msg ok';
+      msg.textContent = `✓ Cliente ${nombre} registrado correctamente.`;
+      ['nc-nombre','nc-apellido','nc-email','nc-tel','nc-pass'].forEach(id => document.getElementById(id).value = '');
+      showToast('¡Cliente registrado!');
+      await loadClients();
+    } catch (e) {
+      msg.className = 'form-msg err';
+      msg.textContent = 'Error: ' + e.message;
+    }
+    btn.disabled = false; btn.textContent = 'Crear cliente';
+  };
+
+  // ── Resumen ──
+  async function loadResumen() {
+    try {
+      const s = await getSummary();
+      document.getElementById('m-total').textContent  = s.totalClients  ?? 0;
+      document.getElementById('m-hoy').textContent    = s.stampsToday   ?? 0;
+      document.getElementById('m-canjes').textContent = s.redeemsMonth  ?? 0;
+    } catch {}
+
+    const top = [...allClients].sort((a,b) => (b.loyalty_cards?.[0]?.stamps ?? 0) - (a.loyalty_cards?.[0]?.stamps ?? 0)).slice(0,5);
+    document.getElementById('top-list').innerHTML = top.map((c,i) => `
+      <div class="top-item">
+        <div class="top-rank">${i+1}</div>
+        <div class="top-info">
+          <div class="top-name">${c.name}</div>
+        </div>
+        <span class="badge earn">${c.loyalty_cards?.[0]?.stamps ?? 0}/10 sellos</span>
+      </div>`).join('') || '<div class="loading">Sin datos aún.</div>';
+  }
+
+  // ── Exportar CSV ──
+  window.exportCSV = function () {
+    const rows = [['Nombre','Teléfono','Sellos','Total canjes','Registro']];
+    allClients.forEach(c => {
+      const card = c.loyalty_cards?.[0];
+      rows.push([c.name, c.phone || '', card?.stamps ?? 0, card?.total_redeemed ?? 0, new Date(c.created_at).toLocaleDateString('es-MX')]);
+    });
+    const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href = url;
+    a.download = 'clientes-naranja-dulce.csv'; a.click();
+  };
+
+  // ── Tabs ──
+  window.switchTab = function (tab, btn) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    else document.querySelector('.tab').classList.add('active');
+    document.getElementById('view-' + tab).classList.add('active');
+    if (tab === 'resumen') loadResumen();
+  };
+
+  // ── Logout ──
+  window.logout = async function () {
+    await signOut();
+    window.location.href = 'index.html';
+  };
+
+  // ── Toast ──
+  window.showToast = function (msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  };
+
+  init();
+</script>
+</body>
+</html>
