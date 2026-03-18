@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Tarjeta – Naranja Dulce Gelatería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange:      #E8620A;
+      --orange-lt:   #F9A05A;
+      --orange-pale: #FEF0E6;
+      --brown:       #5C2D0E;
+      --brown-mid:   #8B4513;
+      --brown-pale:  #F5EDE6;
+      --white:       #FFFFFF;
+      --text:        #1A1A1A;
+      --text-muted:  #6B5744;
+      --border:      rgba(92,45,14,0.15);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--brown-pale); min-height: 100vh; }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem; height: 64px;
+    }
+    .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .topbar-logo img { width: 38px; height: 38px; border-radius: 50%; object-fit: contain; border: 1.5px solid var(--orange-pale); }
+    .topbar-logo-text { font-family: 'Fraunces', serif; font-size: 15px; color: var(--brown); }
+    .topbar-spacer { flex: 1; }
+    .user-chip {
+      font-size: 12px; padding: 5px 12px; border-radius: 99px;
+      background: var(--orange-pale); color: var(--brown); font-weight: 500;
+    }
+    .btn-logout {
+      font-size: 12px; padding: 6px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: none;
+      font-family: 'DM Sans', sans-serif; color: var(--text-muted); cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-logout:hover { background: var(--brown-pale); }
+
+    /* MAIN */
+    .main { max-width: 480px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 2px solid var(--brown); margin-bottom: 1.75rem; }
+    .tab {
+      padding: 9px 22px; font-size: 14px; font-weight: 500;
+      border: none; background: none; color: var(--text-muted); cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    }
+    .tab.active { color: var(--white); background: var(--brown); border-bottom: 3px solid var(--orange); }
+    .tab:not(.active):hover { background: var(--brown-pale); }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* LOYALTY CARD */
+    .loyalty-card {
+      background: linear-gradient(135deg, var(--brown) 0%, var(--brown-mid) 45%, var(--orange) 100%);
+      border-radius: 22px; padding: 1.5rem; color: var(--white);
+      margin-bottom: 1.25rem;
+      box-shadow: 0 8px 32px rgba(92,45,14,0.2);
+    }
+    .lc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+    .lc-brand { display: flex; align-items: center; gap: 10px; }
+    .lc-brand img { width: 42px; height: 42px; border-radius: 50%; object-fit: contain; background: rgba(255,255,255,0.95); padding: 4px; }
+    .lc-brand-text .name { font-family: 'Fraunces', serif; font-size: 14px; }
+    .lc-brand-text .sub  { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.07em; }
+    .lc-brand-text .cid  { font-size: 10px; opacity: 0.55; font-family: monospace; }
+    .lc-owner { text-align: right; }
+    .lc-owner .oname  { font-size: 14px; font-weight: 500; }
+    .lc-owner .oemail { font-size: 11px; opacity: 0.75; }
+
+    .stamps-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 9px; margin-bottom: 1.25rem; }
+    .stamp {
+      aspect-ratio: 1; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.1); overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .stamp.filled { background: rgba(255,255,255,0.95); border-color: var(--white); }
+    .stamp.filled img { width: 68%; height: 68%; object-fit: contain; border-radius: 50%; }
+    .stamp.new { animation: pop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes pop { 0%{transform:scale(0.5)} 100%{transform:scale(1)} }
+
+    .lc-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+    .lc-reward { font-size: 12px; opacity: 0.85; }
+    .lc-count .num { font-family: 'Fraunces', serif; font-size: 28px; color: var(--orange-lt); }
+    .lc-count .lbl { font-size: 11px; opacity: 0.7; text-align: right; }
+
+    /* REDEEM BUTTON */
+    .btn-redeem {
+      width: 100%; padding: 12px; margin-bottom: 1.25rem;
+      border: 2px solid var(--brown); background: var(--brown-pale);
+      border-radius: 12px; font-family: 'Fraunces', serif; font-size: 15px;
+      color: var(--brown); cursor: pointer; transition: background 0.2s;
+    }
+    .btn-redeem:not(:disabled):hover { background: #e8d5c4; }
+    .btn-redeem:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* HISTORIAL */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.25rem;
+    }
+    .card-title { font-size: 11px; font-weight: 500; color: var(--brown); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+    .visit-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .visit-item:last-child { border-bottom: none; }
+    .visit-date { font-size: 11px; color: var(--text-muted); }
+    .visit-desc { font-size: 13px; color: var(--text); margin-top: 2px; }
+    .badge { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 500; white-space: nowrap; }
+    .badge.earn    { background: var(--orange-pale); color: var(--orange); }
+    .badge.redeem  { background: var(--brown-pale);  color: var(--brown);  }
+    .empty-msg { font-size: 13px; color: var(--text-muted); padding: 1rem 0; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 14px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--brown); color: var(--white); padding: 10px 22px;
+      border-radius: 99px; font-size: 13px; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none;
+      border-left: 4px solid var(--orange); white-space: nowrap; z-index: 200;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="topbar-logo" href="index.html">
+    <img src="logo.jpg" alt="Naranja Dulce">
+    <span class="topbar-logo-text">Naranja Dulce Gelatería</span>
+  </a>
+  <div class="topbar-spacer"></div>
+  <span class="user-chip" id="user-chip">🍊 ...</span>
+  <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+</header>
+
+<main class="main" id="main">
+  <div class="loading" id="loading">Cargando tu tarjeta...</div>
+
+  <div id="content" style="display:none;">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('tarjeta', this)">Mi tarjeta</button>
+      <button class="tab" onclick="switchTab('historial', this)">Historial</button>
+    </div>
+
+    <!-- TARJETA -->
+    <div class="view active" id="view-tarjeta">
+      <div class="loyalty-card">
+        <div class="lc-top">
+          <div class="lc-brand">
+            <img src="logo.jpg" alt="ND">
+            <div class="lc-brand-text">
+              <div class="name">Naranja Dulce</div>
+              <div class="sub">Gelato Artesanal</div>
+              <div class="cid" id="card-id">ID: —</div>
+            </div>
+          </div>
+          <div class="lc-owner">
+            <div class="oname"  id="card-name">—</div>
+            <div class="oemail" id="card-email">—</div>
+          </div>
+        </div>
+        <div class="stamps-grid" id="stamps-grid"></div>
+        <div class="lc-bottom">
+          <div class="lc-reward">10 sellos = 1 gelato gratis</div>
+          <div class="lc-count">
+            <div class="num" id="stamps-num">0</div>
+            <div class="lbl">sellos</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-redeem" id="btn-redeem" disabled onclick="redeem()">
+        Necesitas 10 sellos para canjear
+      </button>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="view" id="view-historial">
+      <div class="card">
+        <div class="card-title">Historial de visitas</div>
+        <div id="history-list"><div class="empty-msg">Cargando historial...</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { getUser, getProfile, getCard, getVisits, redeemReward, signOut } from './supabase.js';
+
+  let cardData = null;
+
+  // ── Inicializar ──
+  async function init() {
+    const user = await getUser();
+    if (!user) { window.location.href = 'index.html'; return; }
+
+    const [profile, card] = await Promise.all([getProfile(user.id), getCard(user.id)]);
+
+    if (profile.role === 'admin') { window.location.href = 'admin.html'; return; }
+
+    cardData = card;
+
+    document.getElementById('user-chip').textContent  = '🍊 ' + profile.name;
+    document.getElementById('card-name').textContent  = profile.name;
+    document.getElementById('card-email').textContent = user.email;
+    document.getElementById('card-id').textContent    = 'ID: #' + String(card.id).padStart(4, '0');
+
+    renderStamps(card.stamps);
+    document.getElementById('loading').style.display  = 'none';
+    document.getElementById('content').style.display  = 'block';
+  }
+
+  function renderStamps(n) {
+    const grid = document.getElementById('stamps-grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < 10; i++) {
+      const s = document.createElement('div');
+      s.className = 'stamp' + (i < n ? ' filled' : '');
+      if (i < n) {
+        const img = document.createElement('img');
+        img.src = 'logo.jpg';
+        s.appendChild(img);
+      }
+      grid.appendChild(s);
+    }
+    document.getElementById('stamps-num').textContent = n;
+    const btn = document.getElementById('btn-redeem');
+    btn.disabled    = n < 10;
+    btn.textContent = n >= 10 ? '¡Canjear gelato gratis!' : `Canjear recompensa (${n}/10 sellos)`;
+  }
+
+  // ── Canjear ──
+  window.redeem = async function () {
+    if (!cardData || cardData.stamps < 10) return;
+    const btn = document.getElementById('btn-redeem');
+    btn.disabled = true; btn.textContent = 'Canjeando...';
+    try {
+      await redeemReward(cardData.id, cardData.stamps);
+      cardData.stamps -= 10;
+      renderStamps(cardData.stamps);
+      showToast('¡Recompensa canjeada! 🍦');
+      await loadHistory();
+    } catch (e) {
+      showToast('Error al canjear: ' + e.message);
+      btn.disabled = false;
+    }
+  };
+
+  // ── Historial ──
+  async function loadHistory() {
+    if (!cardData) return;
+    const visits = await getVisits(cardData.id);
+    const el = document.getElementById('history-list');
+    if (!visits.length) {
+      el.innerHTML = '<div class="empty-msg">Sin visitas registradas aún.</div>';
+      return;
+    }
+    el.innerHTML = visits.map(v => `
+      <div class="visit-item">
+        <div>
+          <div class="visit-date">${new Date(v.created_at).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' })}</div>
+          <div class="visit-desc">${v.notes || (v.type === 'earn' ? 'Visita a la tienda' : 'Canje de recompensa')}</div>
+        </div>
+        <span class="badge ${v.type}">${v.type === 'earn' ? '+1 sello' : 'Canje'}</span>
+      </div>`).join('');
+  }
+
+  // ── Tabs ──
+  window.switchTab = function (tab, btn) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + tab).classList.add('active');
+    if (tab === 'historial') loadHistory();
+  };
+
+  // ── Logout ──
+  window.logout = async function () {
+    await signOut();
+    window.location.href = 'index.html';
+  };
+
+  // ── Toast ──
+  window.showToast = function (msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  };
+
+  init();
+</script>
+</body>
+</html>
